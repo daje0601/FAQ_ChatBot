@@ -3,6 +3,7 @@ import os
 import pickle
 import openai
 import chromadb
+import argparse
 from tqdm import tqdm
 from typing import List
 from chromadb.config import Settings
@@ -29,11 +30,22 @@ def main():
     2) Chroma PersistentClient를 이용해 local DB(./embeddings/chroma_db)에 저장
     3) 대량 데이터를 처리하기 위해 batch_size 단위로 add
     """
+    parser = argparse.ArgumentParser(description="FAQ 데이터에서 ChromaDB 인덱스를 구축합니다.")
+    parser.add_argument(
+        "--chunk-size", 
+        type=int, 
+        default=500, 
+        help="청크 크기(문자 단위). 기본값: 500"
+    )
+
+    args = parser.parse_args()
+    chunk_size = args.chunk_size
+
     with open('./data/final_result.pkl', 'rb') as f:
         faq_data = pickle.load(f)
     
     # 1) ChromaDB 클라이언트 생성 (PersistentClient)
-    client = chromadb.PersistentClient(path="./embeddings/chroma_db")
+    client = chromadb.PersistentClient(path=f"./embeddings/chroma_db_{chunk_size}")
     
     # 2) faq_collection 생성 or 가져오기, 임베딩 함수 등록
     collection = client.get_or_create_collection(
@@ -54,7 +66,7 @@ def main():
     print("데이터 전처리 중...")
     for question, answer_text in faq_data.items():
         combined_text = clean_text(question + "\n\n" + answer_text)
-        chunks = chunk_text(combined_text, chunk_size=500)
+        chunks = chunk_text(combined_text, chunk_size=chunk_size)
         
         for chunk in chunks:
             if len(chunk.strip()) < 10:
@@ -67,7 +79,7 @@ def main():
     
     # 4) 배치 처리 후 Chroma DB에 저장
     total_batches = (len(all_chunks) + batch_size - 1) // batch_size
-    for i in tqdm(range(total_batches), desc="벡터 DB 구축 중"):
+    for i in tqdm(range(total_batches), desc=f"벡터 DB 구축 중 - chunk_size : {chunk_size}"):
         start_idx = i * batch_size
         end_idx = min((i + 1) * batch_size, len(all_chunks))
         

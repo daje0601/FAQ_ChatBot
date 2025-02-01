@@ -28,7 +28,7 @@ app = FastAPI()
 # 0) 전역 설정: Chroma Client & Collection
 # -------------------------
 # 1) PersistentClient 로 영구저장 방식 지정
-chroma_client = PersistentClient(path="./embeddings/chroma_db")
+chroma_client = PersistentClient(path="./embeddings/chroma_db_1000")
 
 # 2) OpenAI EmbeddingFunction 등록
 openai_embedding = embedding_functions.OpenAIEmbeddingFunction(
@@ -52,7 +52,7 @@ SESSION_HISTORY: Dict[str, List[Dict[str, str]]] = {}
 # -------------------------
 # 헬퍼 함수
 # -------------------------
-def retrieve_faq_chunks(query: str, top_k: int = 5, threshold: float = 0.8) -> List[str]:
+def retrieve_faq_chunks(query: str, top_k: int = 5, threshold: float = 0.6) -> List[str]:
     try:
         results = collection.query(
             query_texts=[query],
@@ -151,11 +151,9 @@ async def chat_endpoint(request: Request):
 
 주의사항:
 1) 아래에 제공된 FAQ 데이터(질문/답변)을 최우선 근거로 사용합니다.
-2) 이전 대화(히스토리) 중 현재 질문과 직접적으로 관련 없는 내용이 섞여 있다면, 절대 답변에 포함하지 마세요.
-3) 이전 대화(히스토리)는 현재 질문과 연관이 있을 때에만 참고하세요.
-4) 만약 FAQ 데이터에 내용이 없다면 "FAQ에 해당 내용이 없습니다"라고 안내하세요.
-5) 스마트스토어와 전혀 무관한 질문이라면 "스마트 스토어 FAQ를 위한 챗봇..." 식으로 안내해주세요.
-6) 답변 후, 사용자가 궁금해할 만한 후속 질문을 1~2개 제안해주세요.
+2) 이전 대화(히스토리)는 현재 질문과 연관이 있을 때에만 참고하세요.
+3) 스마트스토어와 전혀 무관한 질문이라면 "스마트 스토어 FAQ를 위한 챗봇..." 식으로 안내해주세요.
+4) 답변 후, 사용자가 궁금해할 만한 후속 질문을 1~2개 제안해주세요.
 """
     system_context = "\n\nFAQ 자료(요약):\n" + "\n\n".join(relevant_docs)
 

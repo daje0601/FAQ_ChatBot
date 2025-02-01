@@ -37,7 +37,7 @@
 
 ## 사전 준비
 
-1. **Python 3.8+** 환경이 필요합니다.  
+1. **Python 3.11+** 환경이 필요합니다.  
 2. **OpenAI API Key**를 발급받아, 프로젝트 루트의 `secret.env`에 다음과 같이 저장합니다:
    ```bash
    OPENAI_API_KEY="sk-..."

@@ -123,12 +123,4 @@ curl -X POST http://localhost:8000/chat \
 
 ---
 
-## 환경 변수
 
-- **secret.env**
-  ```bash
-  OPENAI_API_KEY="sk-..."
-  ```
-- 배포 환경에서 `.env` 파일로 읽거나, 시스템 환경 변수로 설정해 사용할 수 있습니다.
-
----
